@@ -1,0 +1,17 @@
+{
+  "name": "adt/viaphone",
+  "version": "1.0.0",
+  "type": "library",
+  "license": ["MIT", "BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
+  "require": {
+    "nette/forms": "^2.3",
+    "nette/di": "^2.3",
+    "nette/utils": "^2.4",
+    "nette/application": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ADT\\": "src/"
+    }
+  }
+}
