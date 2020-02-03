@@ -11,6 +11,10 @@ composer require adt/viaphone
 and in config.neon:
 
 ```neon
-extensions:
-	- ADT\Viaphone\SmsGateway
+services:
+	- ADT\Viaphone\SmsGateway(%smsSender.apiKey%)
+
+parameters: 
+	smsSender:
+		apiKey: xxx
 ```

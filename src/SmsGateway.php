@@ -17,9 +17,6 @@ class SmsGateway
 	protected $url = 'https://api.viaphoneapp.com/v2/';
 
 	/** @var string */
-	protected $singleRecipient;
-
-	/** @var string */
 	protected $smsSenderApiKey;
 
 	/** @var string */
@@ -28,24 +25,10 @@ class SmsGateway
 	/**
 	 * SmsGateway constructor.
 	 *
-	 * @param array $smsSenderOptions
-	 * [
-	 * 	'apiKey' => string,
-	 * 	'singleRecipient' => callback|string
-	 * ]
+	 * @param string $apiKey
 	 */
-	public function __construct($smsSenderOptions) {
-		$this->smsSenderApiKey = $smsSenderOptions['apiKey'];
-
-		if (isset($smsSenderOptions['singleRecipient'])) {
-			if (is_callable($smsSenderOptions['singleRecipient'])) {
-				$this->singleRecipient = call_user_func($smsSenderOptions['singleRecipient']);
-			} else {
-				$this->singleRecipient = $smsSenderOptions['singleRecipient'];
-			}
-		} else {
-			$this->singleRecipient = null;
-		}
+	public function __construct($apiKey) {
+		$this->smsSenderApiKey = $apiKey;
 	}
 
 	/**
@@ -92,16 +75,8 @@ class SmsGateway
 			],
 		];
 
-		if ($this->singleRecipient !== null) {
-			if (isset($data['contact']['name'])) {
-				$data['text'] = $data['contact']['name'] . ': ' . $data['text'];
-			}
-			$data['contact']['phone_number'] = $this->singleRecipient;
-			$data['device'] = $this->singleRecipient;
-		}
-
 		if (! empty($data)) {
-			$optArray[CURLOPT_POSTFIELDS] = json_encode($data);
+			$optArray[CURLOPT_POSTFIELDS] = Json::encode($data);
 		}
 
 		curl_setopt_array($curl, $optArray);
