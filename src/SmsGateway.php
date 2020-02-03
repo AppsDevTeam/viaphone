@@ -4,8 +4,8 @@ namespace ADT\Viaphone;
 
 use Nette\Http\IRequest;
 use Nette\Http\Url;
+use Nette\Utils\DateTime;
 use Nette\Utils\Json;
-use Nette\Utils\Strings;
 
 /**
  * https://viaphonev2.docs.apiary.io
@@ -100,22 +100,27 @@ class SmsGateway
 	 */
 	public function sendSms($data) {
 
+		$data['type'] = 'message';
+		$data['is_outgoing'] = true;
+		$data['valid_to'] = (new DateTime('+1 day'))->format('Y-m-d');
+
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
 	}
 
 	/**
-	 * Odstranění první 0 (kvůli SK číslům, které mohou začínat na 0)
-	 *
-	 * @param string $phone
-	 * @return string
+	 * @param DateTime $updatedAt
+	 * @return array|mixed
 	 */
-	public static function replaceCode($phone) {
+	public function getRecords($updatedAt) {
+		$updatedAfterParam = $updatedAt ? '?updated_at=gte:' . urlencode($updatedAt->format('c')) : '';
+		// TODO: Docasne type
+		// $rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at');
+		$rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at&type=message');
+		$rawData = $this->request($rq);
 
-		if (Strings::startsWith($phone, 0)) {
-			return mb_substr($phone, 1);
-		}
+		$data = !empty($rawData) ? Json::decode($rawData, true) : [];
 
-		return $phone;
+		return $data['data'];
 	}
 
 	/**
