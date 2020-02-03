@@ -4,10 +4,8 @@ namespace ADT\Viaphone;
 
 use Nette\Http\IRequest;
 use Nette\Http\Url;
-use Nette\Utils\DateTime;
 use Nette\Utils\Json;
 use Nette\Utils\Strings;
-use Tracy\Debugger;
 
 /**
  * https://viaphonev2.docs.apiary.io
@@ -143,28 +141,6 @@ class SmsGateway
 		}
 
 		return $phone;
-	}
-
-	/**
-	 * @param DateTime $updatedAt
-	 * @return array|mixed
-	 */
-	public function getRecords($updatedAt) {
-		$updatedAfterParam = $updatedAt ? '?updated_at=gte:' . urlencode($updatedAt->format('c')) : '';
-		// $rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at');
-		// TODO
-		// Docasne type
-		$rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at&type=message');
-		$rawData = $this->request($rq);
-
-		$data = !empty($rawData) ? Json::decode($rawData, true) : [];
-		if (isset($data['error'])) {
-			Debugger::log($data['error']);
-
-			return [];
-		}
-
-		return $data['data'];
 	}
 
 	/**
