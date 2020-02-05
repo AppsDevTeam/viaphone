@@ -98,7 +98,7 @@ class SmsGateway
 	 *
 	 * @return bool
 	 */
-	public function sendSms($data) {
+	public function send($data) {
 
 		$data['type'] = 'message';
 		$data['is_outgoing'] = true;
