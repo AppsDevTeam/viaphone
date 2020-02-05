@@ -1,23 +1,22 @@
 <?php
 
-namespace ADT\Viaphone;
+namespace ADT\ViaPhone;
 
 use Nette\Http\IRequest;
 use Nette\Http\Url;
-use Nette\Utils\DateTime;
 use Nette\Utils\Json;
 
 /**
  * https://viaphonev2.docs.apiary.io
  */
-class SmsGateway
+class ViaPhone
 {
 
 	/** @var string  */
 	protected $url = 'https://api.viaphoneapp.com/v2/';
 
 	/** @var string */
-	protected $smsSenderApiKey;
+	protected $secret;
 
 	/** @var string */
 	protected $lang = 'en';
@@ -28,7 +27,7 @@ class SmsGateway
 	 * @param string $apiKey
 	 */
 	public function __construct($apiKey) {
-		$this->smsSenderApiKey = $apiKey;
+		$this->secret = $apiKey;
 	}
 
 	/**
@@ -70,7 +69,7 @@ class SmsGateway
 			CURLOPT_HTTPHEADER => [
 				"Cache-Control: no-cache",
 				"Content-Type: application/json",
-				"X-API-key: " . $this->smsSenderApiKey,
+				"X-API-key: " . $this->secret,
 				"Accept-Language: " . $this->lang,
 			],
 		];
@@ -98,7 +97,7 @@ class SmsGateway
 	 *
 	 * @return bool
 	 */
-	public function send($data) {
+	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null) {
 
 		$data['type'] = 'message';
 		$data['is_outgoing'] = true;
@@ -111,11 +110,9 @@ class SmsGateway
 	 * @param DateTime $updatedAt
 	 * @return array|mixed
 	 */
-	public function getRecords($updatedAt) {
+	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null) {
 		$updatedAfterParam = $updatedAt ? '?updated_at=gte:' . urlencode($updatedAt->format('c')) : '';
-		// TODO: Docasne type
-		// $rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at');
-		$rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at&type=message');
+		$rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at');
 		$rawData = $this->request($rq);
 
 		$data = !empty($rawData) ? Json::decode($rawData, true) : [];
@@ -127,28 +124,28 @@ class SmsGateway
 	 * @param array $data
 	 * @return array|NULL|string
 	 */
-	public function addNumber(array $data) {
+	public function addDevice($phoneNumber, $name, $email) {
 		return Json::decode($this->request($this->getUrl("devices"), $data, IRequest::POST));
 	}
 
-	public function sendMessageWithDownloadLink($phoneNumber) {
-		$device = $this->readDevice($phoneNumber);
+	public function sendDownloadLink($phoneNumber) {
+		$device = $this->getDevice($phoneNumber);
 
 		return $device ? (bool)$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST) : false;
 	}
 
-	public function readDevice($phoneNumber) {
+	public function getDevice($phoneNumber) {
 		return $this->readAllDevices(['phone_number' => $phoneNumber])[0] ?? false;
 	}
 
-	public function readAllDevices($params = []) {
+	public function getDevices($params = []) {
 		$devices = Json::decode($this->request($this->getUrl("devices"), $params, IRequest::GET));
 
 		return $devices->data ?? [];
 	}
 
 	public function updateDevice($phoneNumber, array $data) {
-		$device = $this->readDevice($phoneNumber);
+		$device = $this->getDevice($phoneNumber);
 
 		return $device ? Json::decode($this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH)) : false;
 	}
