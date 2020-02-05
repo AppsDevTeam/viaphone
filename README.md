@@ -12,7 +12,7 @@ and in config.neon:
 
 ```neon
 services:
-	- ADT\Viaphone\SmsGateway(%smsSender.apiKey%)
+	- ADT\Viaphone\Viaphone(%viaphone.apiKey%)
 
 parameters: 
 	smsSender:

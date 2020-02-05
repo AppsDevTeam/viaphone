@@ -5,12 +5,15 @@ namespace ADT\ViaPhone;
 use Nette\Http\IRequest;
 use Nette\Http\Url;
 use Nette\Utils\Json;
+use Ramsey\Uuid\Uuid;
 
 /**
  * https://viaphonev2.docs.apiary.io
  */
 class ViaPhone
 {
+	const TYPE_SMS = 'message';
+	const TYPE_CALL = 'call';
 
 	/** @var string  */
 	protected $url = 'https://api.viaphoneapp.com/v2/';
@@ -22,7 +25,7 @@ class ViaPhone
 	protected $lang = 'en';
 
 	/**
-	 * SmsGateway constructor.
+	 * ViaPhone constructor.
 	 *
 	 * @param string $apiKey
 	 */
@@ -93,39 +96,81 @@ class ViaPhone
 	}
 
 	/**
-	 * @param array $data
+	 * @param string $text
+	 * @param string $contactPhoneNumber
+	 * @param string|null $contactName
+	 * @param string|null $devicePhoneNumber
 	 *
-	 * @return bool
+	 * @return array|NULL|string
 	 */
 	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null) {
-
-		$data['type'] = 'message';
-		$data['is_outgoing'] = true;
-		$data['valid_to'] = (new DateTime('+1 day'))->format('Y-m-d');
+		$data = [
+			'type' => self::TYPE_SMS,
+			'uuid' => Uuid::uuid4(),
+			'text' => $text,
+			'contact' => [
+				'phone_number' => $contactPhoneNumber,
+				'name' => $contactName,
+			],
+			'device' => $devicePhoneNumber,
+			'is_outgoing' => true,
+			'valid_to' => (new \DateTime('+1 day'))->format('Y-m-d'),
+		];
 
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
 	}
 
 	/**
-	 * @param DateTime $updatedAt
-	 * @return array|mixed
+	 * @param array $criteria
+	 * @param string $sortBy
+	 * @param string $sortOrder
+	 * @param int $limit
+	 * @param null $offset
+	 *
+	 * @return mixed
 	 */
 	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null) {
-		$updatedAfterParam = $updatedAt ? '?updated_at=gte:' . urlencode($updatedAt->format('c')) : '';
-		$rq = $this->getUrl("records" . $updatedAfterParam . ($updatedAfterParam ? '&' : '?') . 'sort=updated_at');
-		$rawData = $this->request($rq);
+		$url = '?';
 
-		$data = !empty($rawData) ? Json::decode($rawData, true) : [];
+		foreach ($criteria as $criterionKey => $criterionValue) {
+			if ($url !== '?') {
+				$url .= '&';
+			}
 
-		return $data['data'];
+			if ($criterionKey = 'updated_at') {
+				$criterionValue = $criterionValue->format('c');
+			}
+			$url .= $criterionKey . '=gte:' . urlencode($criterionValue);
+		}
+
+		if ($url !== '?') {
+			$url .= '&';
+		}
+
+		$url .= 'sort=' . ($sortOrder === 'desc' ? '-' : '') . $sortBy;
+		$rq = $this->getUrl("records" . $url);
+		$data = Json::decode($this->request($this->getUrl($rq), ['limit' => $limit, 'offset' => $offset]));
+
+		return $data['data'] ?? [];
 	}
 
 	/**
-	 * @param array $data
-	 * @return array|NULL|string
+	 * @param $phoneNumber
+	 * @param $name
+	 * @param $email
+	 *
+	 * @return mixed
 	 */
 	public function addDevice($phoneNumber, $name, $email) {
-		return Json::decode($this->request($this->getUrl("devices"), $data, IRequest::POST));
+		return Json::decode($this->request(
+			$this->getUrl("devices"),
+			[
+				'phoneNumber' => $phoneNumber,
+				'name' => $name,
+				'email' => $email
+			],
+			IRequest::POST)
+		);
 	}
 
 	public function sendDownloadLink($phoneNumber) {
@@ -135,7 +180,7 @@ class ViaPhone
 	}
 
 	public function getDevice($phoneNumber) {
-		return $this->readAllDevices(['phone_number' => $phoneNumber])[0] ?? false;
+		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? false;
 	}
 
 	public function getDevices($params = []) {
