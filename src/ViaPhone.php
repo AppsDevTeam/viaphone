@@ -86,12 +86,14 @@ class ViaPhone
 		curl_setopt_array($curl, $optArray);
 
 		$response = curl_exec($curl);
-		$err = curl_error($curl);
+
+		$errno = curl_errno($curl);
+		$error = curl_error($curl);
 
 		curl_close($curl);
 
-		if ($err) {
-			throw new \Exception('Nepodarilo sa odoslať požiadavok.' . "\n" . print_r($err, true));
+		if ($errno) {
+			throw new \Exception($error, $errno);
 		}
 
 		return !empty($response) ? $response : [];
