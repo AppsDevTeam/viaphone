@@ -15,7 +15,7 @@ class ViaPhone
 	const TYPE_SMS = 'message';
 	const TYPE_CALL = 'call';
 
-	/** @var string  */
+	/** @var string */
 	protected $url = 'https://api.viaphoneapp.com/v2/';
 
 	/** @var string */
@@ -29,7 +29,8 @@ class ViaPhone
 	 *
 	 * @param string $apiKey
 	 */
-	public function __construct($apiKey) {
+	public function __construct($apiKey)
+	{
 		$this->secret = $apiKey;
 	}
 
@@ -38,7 +39,8 @@ class ViaPhone
 	 * @param array $queryParams
 	 * @return string
 	 */
-	protected function getUrl($path, array $queryParams = []) {
+	protected function getUrl($path, array $queryParams = [])
+	{
 		$url = $this->url . $path;
 
 		if ($queryParams) {
@@ -46,7 +48,7 @@ class ViaPhone
 			$url->setQuery($queryParams);
 		}
 
-		return (string) $url;
+		return (string)$url;
 	}
 
 	/**
@@ -56,7 +58,7 @@ class ViaPhone
 	 *
 	 * @return string|NULL|array
 	 */
-	protected function request($url, $data = NULL, $method = IRequest::GET)
+	protected function request($url, $data = null, $method = IRequest::GET)
 	{
 		$curl = curl_init();
 
@@ -89,7 +91,7 @@ class ViaPhone
 		curl_close($curl);
 
 		if ($err) {
-			throw new \Exception('Nepodarilo sa odoslať požiadavok.' . "\n" . print_r($err, TRUE));
+			throw new \Exception('Nepodarilo sa odoslať požiadavok.' . "\n" . print_r($err, true));
 		}
 
 		return !empty($response) ? $response : [];
@@ -103,7 +105,8 @@ class ViaPhone
 	 *
 	 * @return array|NULL|string
 	 */
-	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null) {
+	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null)
+	{
 		$data = [
 			'type' => self::TYPE_SMS,
 			'uuid' => Uuid::uuid4(),
@@ -129,7 +132,8 @@ class ViaPhone
 	 *
 	 * @return mixed
 	 */
-	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null) {
+	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null)
+	{
 		$url = '?';
 
 		foreach ($criteria as $criterionKey => $criterionValue) {
@@ -161,7 +165,8 @@ class ViaPhone
 	 *
 	 * @return mixed
 	 */
-	public function addDevice($phoneNumber, $name, $email) {
+	public function addDevice($phoneNumber, $name, $email)
+	{
 		return Json::decode($this->request(
 			$this->getUrl("devices"),
 			[
@@ -173,23 +178,27 @@ class ViaPhone
 		);
 	}
 
-	public function sendDownloadLink($phoneNumber) {
+	public function sendDownloadLink($phoneNumber)
+	{
 		$device = $this->getDevice($phoneNumber);
 
 		return $device ? (bool)$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST) : false;
 	}
 
-	public function getDevice($phoneNumber) {
+	public function getDevice($phoneNumber)
+	{
 		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? false;
 	}
 
-	public function getDevices($params = []) {
+	public function getDevices($params = [])
+	{
 		$devices = Json::decode($this->request($this->getUrl("devices"), $params, IRequest::GET));
 
 		return $devices->data ?? [];
 	}
 
-	public function updateDevice($phoneNumber, array $data) {
+	public function updateDevice($phoneNumber, array $data)
+	{
 		$device = $this->getDevice($phoneNumber);
 
 		return $device ? Json::decode($this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH)) : false;
