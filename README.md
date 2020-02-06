@@ -1,4 +1,4 @@
-# viaPhone
+# ViaPhone
 
 ## Installation
 
