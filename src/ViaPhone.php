@@ -180,7 +180,7 @@ class ViaPhone
 		$device = $this->getDevice($phoneNumber);
 
 		if ($device) {
-			$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST)
+			$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST);
 		}
 	}
 
