@@ -172,18 +172,33 @@ class ViaPhone
 		return $this->request($this->getUrl("devices"), ['phoneNumber' => $phoneNumber, 'name' => $name, 'email' => $email], IRequest::POST);
 	}
 
+	/**
+	 * @param string $phoneNumber
+	 */
 	public function sendDownloadLink($phoneNumber)
 	{
 		$device = $this->getDevice($phoneNumber);
 
-		return $device ? (bool)$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST) : false;
+		if ($device) {
+			$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST)
+		}
 	}
 
+	/**
+	 * @param string $phoneNumber
+	 *
+	 * @return object|null
+	 */
 	public function getDevice($phoneNumber)
 	{
 		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? null;
 	}
 
+	/**
+	 * @param array $params
+	 *
+	 * @return array
+	 */
 	public function getDevices($params = [])
 	{
 		$devices = $this->request($this->getUrl("devices"), $params, IRequest::GET);
@@ -191,6 +206,12 @@ class ViaPhone
 		return $devices->data ?? [];
 	}
 
+	/**
+	 * @param string $phoneNumber
+	 * @param array $data
+	 *
+	 * @return object|null
+	 */
 	public function updateDevice($phoneNumber, array $data)
 	{
 		$device = $this->getDevice($phoneNumber);
