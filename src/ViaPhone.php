@@ -56,7 +56,7 @@ class ViaPhone
 	 * @param array $data
 	 * @param string $method
 	 *
-	 * @return string|NULL|array
+	 * @return object
 	 */
 	protected function request($url, $data = null, $method = IRequest::GET)
 	{
@@ -96,7 +96,7 @@ class ViaPhone
 			throw new \Exception($error, $errno);
 		}
 
-		return !empty($response) ? $response : [];
+		return Json::decode($response);
 	}
 
 	/**
@@ -105,7 +105,7 @@ class ViaPhone
 	 * @param string|null $contactName
 	 * @param string|null $devicePhoneNumber
 	 *
-	 * @return array|NULL|string
+	 * @return object
 	 */
 	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null)
 	{
@@ -130,9 +130,9 @@ class ViaPhone
 	 * @param string $sortBy
 	 * @param string $sortOrder
 	 * @param int $limit
-	 * @param null $offset
+	 * @param int|null $offset
 	 *
-	 * @return mixed
+	 * @return object
 	 */
 	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null)
 	{
@@ -155,29 +155,21 @@ class ViaPhone
 
 		$url .= 'sort=' . ($sortOrder === 'desc' ? '-' : '') . $sortBy;
 		$rq = $this->getUrl("records" . $url);
-		$data = Json::decode($this->request($this->getUrl($rq), ['limit' => $limit, 'offset' => $offset]));
+		$response = $this->request($this->getUrl($rq), ['limit' => $limit, 'offset' => $offset]);
 
-		return $data['data'] ?? [];
+		return $response->data ?? [];
 	}
 
 	/**
-	 * @param $phoneNumber
-	 * @param $name
-	 * @param $email
+	 * @param string $phoneNumber
+	 * @param string $name
+	 * @param string $email
 	 *
-	 * @return mixed
+	 * @return object
 	 */
 	public function addDevice($phoneNumber, $name, $email)
 	{
-		return Json::decode($this->request(
-			$this->getUrl("devices"),
-			[
-				'phoneNumber' => $phoneNumber,
-				'name' => $name,
-				'email' => $email
-			],
-			IRequest::POST)
-		);
+		return $this->request($this->getUrl("devices"), ['phoneNumber' => $phoneNumber, 'name' => $name, 'email' => $email], IRequest::POST);
 	}
 
 	public function sendDownloadLink($phoneNumber)
@@ -189,12 +181,12 @@ class ViaPhone
 
 	public function getDevice($phoneNumber)
 	{
-		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? false;
+		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? null;
 	}
 
 	public function getDevices($params = [])
 	{
-		$devices = Json::decode($this->request($this->getUrl("devices"), $params, IRequest::GET));
+		$devices = $this->request($this->getUrl("devices"), $params, IRequest::GET);
 
 		return $devices->data ?? [];
 	}
@@ -203,7 +195,7 @@ class ViaPhone
 	{
 		$device = $this->getDevice($phoneNumber);
 
-		return $device ? Json::decode($this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH)) : false;
+		return $device ? $this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH) : null;
 	}
 
 }
