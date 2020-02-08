@@ -5,6 +5,7 @@ namespace ADT\ViaPhone;
 use Nette\Http\IRequest;
 use Nette\Http\Url;
 use Nette\Utils\Json;
+use Nette\Utils\JsonException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -39,7 +40,7 @@ class ViaPhone
 	 * @param array $queryParams
 	 * @return string
 	 */
-	protected function getUrl($path, array $queryParams = [])
+	protected function getUrl(string $path, array $queryParams = [])
 	{
 		$url = $this->url . $path;
 
@@ -55,10 +56,10 @@ class ViaPhone
 	 * @param string $url
 	 * @param array $data
 	 * @param string $method
-	 *
-	 * @return object
+	 * @return bool|object
+	 * @throws \Exception
 	 */
-	protected function request($url, $data = null, $method = IRequest::GET)
+	protected function request(string $url, array $data = [], string $method = IRequest::GET)
 	{
 		$curl = curl_init();
 
@@ -80,12 +81,21 @@ class ViaPhone
 		];
 
 		if (! empty($data)) {
-			$optArray[CURLOPT_POSTFIELDS] = Json::encode($data);
+			try {
+				$optArray[CURLOPT_POSTFIELDS] = Json::encode($data);
+			}
+			catch (JsonException $e) {
+				throw new \Exception("Malformed request data", 0, $e);
+			}
 		}
 
 		curl_setopt_array($curl, $optArray);
 
 		$response = curl_exec($curl);
+
+		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 204) {
+			return true;
+		};
 
 		$errno = curl_errno($curl);
 		$error = curl_error($curl);
@@ -96,28 +106,33 @@ class ViaPhone
 			throw new \Exception($error, $errno);
 		}
 
-		return Json::decode($response);
+		try {
+			return (object) Json::decode($response);
+		}
+		catch (JsonException $e) {
+			throw new \Exception("Server returned a malformed response", 0, $e);
+		}
 	}
 
 	/**
 	 * @param string $text
 	 * @param string $contactPhoneNumber
 	 * @param string|null $contactName
-	 * @param string|null $devicePhoneNumber
-	 *
-	 * @return object
+	 * @param object|string $device
+	 * @return bool|object
+	 * @throws \Exception
 	 */
-	public function sendSmsMessage($text, $contactPhoneNumber, $contactName = null, $devicePhoneNumber = null)
+	public function sendSmsMessage(string $text, string $contactPhoneNumber, string $contactName = null, $device = null)
 	{
 		$data = [
 			'type' => self::TYPE_SMS,
 			'uuid' => Uuid::uuid4(),
 			'text' => $text,
+			'device' => is_object($device) ? $device->phone_number : $device,
 			'contact' => [
 				'phone_number' => $contactPhoneNumber,
 				'name' => $contactName,
 			],
-			'device' => $devicePhoneNumber,
 			'is_outgoing' => true,
 			'valid_to' => (new \DateTime('+1 day'))->format('Y-m-d'),
 		];
@@ -131,10 +146,10 @@ class ViaPhone
 	 * @param string $sortOrder
 	 * @param int $limit
 	 * @param int|null $offset
-	 *
-	 * @return object
+	 * @return array
+	 * @throws \Exception
 	 */
-	public function getRecords(array $criteria = [], $sortBy = 'updated_at', $sortOrder = 'desc', $limit = 100, $offset = null)
+	public function getRecords(array $criteria = [], string $sortBy = 'updated_at', string $sortOrder = 'desc', int $limit = 100, int $offset = null)
 	{
 		$url = '?';
 
@@ -164,59 +179,60 @@ class ViaPhone
 	 * @param string $phoneNumber
 	 * @param string $name
 	 * @param string $email
-	 *
 	 * @return object
+	 * @throws \Exception
 	 */
-	public function addDevice($phoneNumber, $name, $email)
+	public function addDevice(string $phoneNumber, string $name, string $email)
 	{
 		return $this->request($this->getUrl("devices"), ['phoneNumber' => $phoneNumber, 'name' => $name, 'email' => $email], IRequest::POST);
 	}
 
 	/**
-	 * @param string $phoneNumber
+	 * @param object|string $device
+	 * @return null|object
+	 * @throws \Exception
 	 */
-	public function sendDownloadLink($phoneNumber)
+	public function sendDownloadLink($device)
 	{
-		$device = $this->getDevice($phoneNumber);
-
-		if ($device) {
-			$this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST);
+		if (!is_object($device)) {
+			$device = $this->getDevice($device);
 		}
+
+		return $device ? $this->request($this->getUrl("devices/$device->uuid/requests"), ['type' => 'download-link'], IRequest::POST) : null;
 	}
 
 	/**
-	 * @param string $phoneNumber
-	 *
-	 * @return object|null
+	 * @param $phoneNumber
+	 * @return null|object
+	 * @throws \Exception
 	 */
 	public function getDevice($phoneNumber)
 	{
-		return $this->getDevices(['phone_number' => $phoneNumber])[0] ?? null;
+		return (object) $this->getDevices(['phone_number' => $phoneNumber])[0] ?? null;
 	}
 
 	/**
 	 * @param array $params
-	 *
 	 * @return array
+	 * @throws \Exception
 	 */
-	public function getDevices($params = [])
+	public function getDevices(array $params = [])
 	{
-		$devices = $this->request($this->getUrl("devices"), $params, IRequest::GET);
-
-		return $devices->data ?? [];
+		return $this->request($this->getUrl("devices"), $params, IRequest::GET)->data ?? [];
 	}
 
 	/**
-	 * @param string $phoneNumber
+	 * @param object|string $device
 	 * @param array $data
-	 *
-	 * @return object|null
+	 * @return null|object
+	 * @throws \Exception
 	 */
-	public function updateDevice($phoneNumber, array $data)
+	public function updateDevice($device, array $data)
 	{
-		$device = $this->getDevice($phoneNumber);
+		if (!is_object($device)) {
+			$device = $this->getDevice($device);
+		}
 
 		return $device ? $this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH) : null;
 	}
-
 }
