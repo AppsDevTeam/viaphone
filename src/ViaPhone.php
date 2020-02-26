@@ -184,7 +184,7 @@ class ViaPhone
 	 */
 	public function addDevice(string $phoneNumber, string $name, string $email)
 	{
-		return $this->request($this->getUrl("devices"), ['phoneNumber' => $phoneNumber, 'name' => $name, 'email' => $email], IRequest::POST);
+		return $this->request($this->getUrl("devices"), ['phone_number' => $phoneNumber, 'name' => $name, 'email' => $email], IRequest::POST);
 	}
 
 	/**
