@@ -93,7 +93,7 @@ class ViaPhone
 
 		$response = curl_exec($curl);
 
-		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 204) {
+		if (curl_getinfo($curl, CURLINFO_HTTP_CODE) === 204) {
 			return true;
 		};
 
