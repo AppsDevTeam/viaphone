@@ -208,7 +208,12 @@ class ViaPhone
 	 */
 	public function getDevice($phoneNumber)
 	{
-		return (object) $this->getDevices(['phone_number' => $phoneNumber])[0] ?? null;
+		$devices = $this->getDevices(['phone_number' => $phoneNumber]);
+		if (isset($devices[0])) {
+			return (object) $devices[0];
+		}
+
+		return null;
 	}
 
 	/**
