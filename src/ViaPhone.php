@@ -169,8 +169,8 @@ class ViaPhone
 		}
 
 		$url .= 'sort=' . ($sortOrder === 'desc' ? '-' : '') . $sortBy;
-		$rq = $this->getUrl("records" . $url);
-		$response = $this->request($this->getUrl($rq), ['limit' => $limit, 'offset' => $offset]);
+		
+		$response = $this->request($this->getUrl("records" . $url), ['limit' => $limit, 'offset' => $offset]);
 
 		return $response->data ?? [];
 	}
