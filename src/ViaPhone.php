@@ -56,7 +56,7 @@ class ViaPhone
 	 * @param string $url
 	 * @param array $data
 	 * @param string $method
-	 * @return bool|object
+	 * @return bool|object|string
 	 * @throws \Exception
 	 */
 	protected function request(string $url, array $data = [], string $method = IRequest::GET)
@@ -93,7 +93,9 @@ class ViaPhone
 
 		$response = curl_exec($curl);
 
-		if (curl_getinfo($curl, CURLINFO_HTTP_CODE) === 204) {
+		$curlInfo = curl_getinfo($curl);
+
+		if ($curlInfo['http_code'] === 204) {
 			return true;
 		};
 
@@ -104,6 +106,10 @@ class ViaPhone
 
 		if ($errno) {
 			throw new \Exception($error, $errno);
+		}
+
+		if ($curlInfo['content_type'] === 'audio/mpeg') {
+			return $response;
 		}
 
 		try {
@@ -169,7 +175,7 @@ class ViaPhone
 		}
 
 		$url .= 'sort=' . ($sortOrder === 'desc' ? '-' : '') . $sortBy;
-		
+
 		$response = $this->request($this->getUrl("records" . $url), ['limit' => $limit, 'offset' => $offset]);
 
 		return $response->data ?? [];
@@ -239,5 +245,25 @@ class ViaPhone
 		}
 
 		return $device ? $this->request($this->getUrl("devices/$device->uuid"), $data, IRequest::PATCH) : null;
+	}
+
+	/**
+	 * @param string $uuid
+	 * @return string|null
+	 * @throws \Exception
+	 */
+	public function getCallRecord($uuid)
+	{
+		$response = $this->request($this->getUrl("records/$uuid/recording"), [], IRequest::GET);
+
+		try {
+			$jsonResponse = (object) Json::decode($response);
+			if (isset($jsonResponse->error)) {
+				return null;
+			}
+		} catch (JsonException $e) {
+			return $response;
+		}
+
 	}
 }
