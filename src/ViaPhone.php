@@ -16,6 +16,12 @@ class ViaPhone
 	const TYPE_SMS = 'message';
 	const TYPE_CALL = 'call';
 
+	const CALL_STATE_WAITING = 'waiting';
+	const CALL_STATE_ONGOING = 'ongoing';
+	const CALL_STATE_ANSWERED = 'answered';
+	const CALL_STATE_NOT_ANSWERED = 'not_answered';
+	const CALL_STATE_REFUSED = 'refused';
+
 	/** @var string */
 	protected $url = 'https://api.viaphoneapp.com/v2/';
 
@@ -265,5 +271,29 @@ class ViaPhone
 			return $response;
 		}
 
+	}
+
+	/**
+	 * @param string $contactPhoneNumber
+	 * @param string|null $contactName
+	 * @param object|string $device
+	 * @return bool|object
+	 * @throws \Exception
+	 */
+	public function call(string $contactPhoneNumber, string $contactName = null, $device = null)
+	{
+		$data = [
+			'type' => static::TYPE_CALL,
+			'uuid' => Uuid::uuid4(),
+			'device' => is_object($device) ? $device->phone_number : $device,
+			'contact' => [
+				'phone_number' => $contactPhoneNumber,
+				'name' => $contactName,
+			],
+			'call_state' => static::CALL_STATE_ONGOING,
+			'started_at' => new \DateTime,
+		];
+
+		return $this->request($this->getUrl("records"), $data, IRequest::POST);
 	}
 }
