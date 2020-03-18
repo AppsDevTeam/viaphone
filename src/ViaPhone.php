@@ -290,8 +290,8 @@ class ViaPhone
 				'phone_number' => $contactPhoneNumber,
 				'name' => $contactName,
 			],
-			'call_state' => static::CALL_STATE_ONGOING,
-			'started_at' => new \DateTime,
+			'call_state' => static::CALL_STATE_WAITING,
+			'started_at' => (new \DateTime())->format('c'),
 		];
 
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
