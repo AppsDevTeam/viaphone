@@ -20,6 +20,7 @@ parameters:
 ```
 Usage
 ---------
-$viaPhone = ADT\ViaPhone\ViaPhone('apiKey');
-
-$viaPhone->sendSmsMessage('text', '+420213456789', 'Jozef Mak');
+```php
+$viaPhone = new \ADT\ViaPhone\ViaPhone('apiKey');
+$viaPhone->sendSmsMessage('text', '+420213456789', 'Recipient Name');
+```
