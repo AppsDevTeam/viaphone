@@ -145,7 +145,6 @@ class ViaPhone
 				'phone_number' => $contactPhoneNumber,
 				'name' => $contactName,
 			],
-			'is_outgoing' => true,
 			'valid_to' => (new \DateTime('+1 day'))->format('Y-m-d'),
 		];
 
