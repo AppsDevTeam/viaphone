@@ -259,17 +259,7 @@ class ViaPhone
 	 */
 	public function getCallRecord($uuid)
 	{
-		$response = $this->request($this->getUrl("records/$uuid/recording"), [], IRequest::GET);
-
-		try {
-			$jsonResponse = (object) Json::decode($response);
-			if (isset($jsonResponse->error)) {
-				return null;
-			}
-		} catch (JsonException $e) {
-			return $response;
-		}
-
+		return $this->request($this->getUrl("records/$uuid/recording"), [], IRequest::GET);
 	}
 
 	/**
