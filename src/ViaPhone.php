@@ -134,7 +134,7 @@ class ViaPhone
 	 * @return bool|object
 	 * @throws \Exception
 	 */
-	public function sendSmsMessage(string $text, string $contactPhoneNumber, string $contactName = null, $device = null)
+	public function sendSmsMessage(string $text, string $contactPhoneNumber, string $contactName = null, $device = null, ?string $note = null)
 	{
 		$data = [
 			'type' => self::TYPE_SMS,
@@ -146,6 +146,7 @@ class ViaPhone
 				'name' => $contactName,
 			],
 			'valid_to' => (new \DateTime('+1 day'))->format('Y-m-d'),
+			'note' => $note
 		];
 
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
