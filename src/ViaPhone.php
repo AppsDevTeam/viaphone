@@ -131,14 +131,16 @@ class ViaPhone
 	 * @param string $contactPhoneNumber
 	 * @param string|null $contactName
 	 * @param object|string $device
+	 * @param string|null $note
+	 * @param string|null $uuid
 	 * @return bool|object
 	 * @throws \Exception
 	 */
-	public function sendSmsMessage(string $text, string $contactPhoneNumber, string $contactName = null, $device = null, ?string $note = null)
+	public function sendSmsMessage(string $text, string $contactPhoneNumber, string $contactName = null, $device = null, ?string $note = null, ?string $uuid = null)
 	{
 		$data = [
 			'type' => self::TYPE_SMS,
-			'uuid' => Uuid::uuid4(),
+			'uuid' => $uuid ?? Uuid::uuid4(),
 			'text' => $text,
 			'device' => is_object($device) ? $device->phone_number : $device,
 			'contact' => [
