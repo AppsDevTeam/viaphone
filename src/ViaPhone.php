@@ -172,7 +172,7 @@ class ViaPhone
 				$url .= '&';
 			}
 
-			if ($criterionKey = 'updated_at') {
+			if ($criterionKey == 'updated_at') {
 				$criterionValue = $criterionValue->format('c');
 			}
 			$url .= $criterionKey . '=gte:' . urlencode($criterionValue);
