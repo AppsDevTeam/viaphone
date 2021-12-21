@@ -153,6 +153,16 @@ class ViaPhone
 
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
 	}
+	
+	/**
+	 * @param string $uuid
+	 * @return object
+	 * @throws \Exception
+	 */
+	public function getRecord(string $uuid)
+	{
+		return $this->request($this->getUrl("records/$uuid"), [], IRequest::GET);
+	}
 
 	/**
 	 * @param array $criteria
