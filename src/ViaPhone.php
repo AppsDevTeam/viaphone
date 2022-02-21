@@ -143,7 +143,7 @@ class ViaPhone
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
-		bool $sendValidTo = true
+		?\DateTimeInterface $validTo = null
 	)
 	{
 		$data = [
@@ -158,8 +158,8 @@ class ViaPhone
 			'note' => $note
 		];
 
-		if ($sendValidTo) {
-			$data['valid_to'] = (new \DateTime('+1 day'))->format('Y-m-d');
+		if ($validTo) {
+			$data['valid_to'] = $validTo->format('Y-m-d');
 		}
 
 		return $this->request($this->getUrl("records"), $data, IRequest::POST);
