@@ -42,7 +42,7 @@ class ViaPhone
 	{
 		$options = ['headers' => $this->headers];
 		if ($method === IRequest::GET) {
-			$options['json'] = $data;
+			$options['query'] = $data;
 		} elseif($method === IRequest::POST || $method === IRequest::PATCH) {
 			$options['json'] = $data;
 		} else {
