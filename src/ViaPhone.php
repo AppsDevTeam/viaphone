@@ -154,9 +154,9 @@ class ViaPhone
 	}
 
 
-	public function getDevices(array $params = [])
+	public function getDevices(array $criteria = []): array
 	{
-		return $this->request('devices', IRequest::GET, $params)->data ?? [];
+		return $this->request('devices', IRequest::GET, $criteria)->data ?? [];
 	}
 
 
@@ -186,8 +186,6 @@ class ViaPhone
 				'phone_number' => $contactPhoneNumber,
 				'name' => $contactName,
 			],
-			'call_state' => static::CALL_STATE_WAITING,
-			'started_at' => (new \DateTime())->format('c'),
 		];
 
 		return $this->request("records", IRequest::POST, $data);
