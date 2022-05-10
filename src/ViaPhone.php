@@ -114,12 +114,8 @@ class ViaPhone
 			'sort' => ($sortOrder === 'desc' ? '-' : '') . $sortBy
 		];
 		foreach ($criteria as $criterionKey => $criterionValue) {
-			if ($criterionKey === 'updated_at') {
-				$criterionValue = $criterionValue->format('c');
-			}
 			$query[$criterionKey] = $criterionValue;
 		}
-
 
 		$response = $this->request('records', IRequest::GET, $query);
 
