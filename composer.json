@@ -5,7 +5,8 @@
   "require": {
     "nette/utils": "^2.4 | ^3.0",
     "nette/http": "^2.4 | ^3.0",
-    "ramsey/uuid": "^3.8 | ^4.2"
+    "ramsey/uuid": "^3.8 | ^4.2",
+    "guzzlehttp/guzzle": "^6.5 | ^7.4"
   },
   "autoload": {
     "psr-4": {
