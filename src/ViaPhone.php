@@ -135,7 +135,7 @@ class ViaPhone
 			$device = $this->getDevice($device);
 		}
 
-		return $device ? $this->request("devices/$device->uuid/requests", IRequest::POST, ['type' => 'download-link']) : null;
+		return $device ? $this->request("devices/$device->uuid/requests", IRequest::POST, ['type' => 'download_link']) : null;
 	}
 
 
