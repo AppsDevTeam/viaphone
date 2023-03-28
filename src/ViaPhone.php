@@ -3,7 +3,6 @@
 namespace ADT\ViaPhone;
 
 use GuzzleHttp\Client;
-use Nette\Http\IRequest;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 use Ramsey\Uuid\Uuid;
