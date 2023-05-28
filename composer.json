@@ -3,7 +3,7 @@
   "type": "library",
   "license": ["MIT", "BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
   "require": {
-    "nette/utils": "^2.4 | ^3.0",
+    "nette/utils": "^2.4 | ^3.0 | ^4.0",
     "ramsey/uuid": "^3.8 | ^4.2",
     "guzzlehttp/guzzle": "^6.5 | ^7.4"
   },
