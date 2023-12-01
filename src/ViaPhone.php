@@ -122,9 +122,9 @@ class ViaPhone
 	}
 
 
-	public function addDevice(string $phoneNumber, string $name, string $email)
+	public function addDevice(string $phoneNumber, string $name, string $email, array $data = [])
 	{
-		return $this->request('devices', IRequest::POST, ['phone_number' => $phoneNumber, 'name' => $name, 'email' => $email]);
+		return $this->request('devices', IRequest::POST, array_merge($data, ['phone_number' => $phoneNumber, 'name' => $name, 'email' => $email]));
 	}
 
 
