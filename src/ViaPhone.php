@@ -194,7 +194,7 @@ class ViaPhone
 			'phone_number' => $phoneNumber,
 		];
 
-		return $this->request($this->getUrl("devices") . '/' . $uuid . '/requests', $data, IRequest::POST);
+		return $this->request("devices/$uuid/requests", IRequest::POST, $data);
 	}
 
 
@@ -204,6 +204,6 @@ class ViaPhone
 			'type' => 'call_forwarding_cancel',
 		];
 
-		return $this->request($this->getUrl("devices") . '/' . $uuid . '/requests', $data, IRequest::POST);
+		return $this->request("devices/$uuid/requests", IRequest::POST, $data);
 	}
 }
