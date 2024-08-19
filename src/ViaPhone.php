@@ -14,6 +14,7 @@ class ViaPhone
 {
 	const TYPE_SMS = 'message';
 	const TYPE_CALL = 'call';
+	const TYPE_WHATSAPP = 'whatsapp';
 
 	const CALL_STATE_WAITING = 'waiting';
 	const CALL_STATE_ONGOING = 'ongoing';
@@ -73,8 +74,37 @@ class ViaPhone
 		?int $validFor = null
 	)
 	{
+		return $this->sendMessage(self::TYPE_SMS, ...func_get_args());
+	}
+
+
+	public function sendWhatsAppMessage(
+		string $text,
+		string $contactPhoneNumber,
+		string $contactName = null,
+		$device = null,
+		?string $note = null,
+		?string $uuid = null,
+		?int $validFor = null
+	)
+	{
+		return $this->sendMessage(self::TYPE_WHATSAPP, ...func_get_args());
+	}
+
+
+	private function sendMessage(
+		string $type,
+		string $text,
+		string $contactPhoneNumber,
+		string $contactName = null,
+		$device = null,
+		?string $note = null,
+		?string $uuid = null,
+		?int $validFor = null
+	)
+	{
 		$data = [
-			'type' => self::TYPE_SMS,
+			'type' => $type,
 			'uuid' => $uuid ?? Uuid::uuid4(),
 			'text' => $text,
 			'device' => is_object($device) ? $device->phone_number : $device,
