@@ -67,7 +67,7 @@ class ViaPhone
 	public function sendSmsMessage(
 		string $text,
 		string $contactPhoneNumber,
-		string $contactName = null,
+		?string $contactName = null,
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
@@ -81,7 +81,7 @@ class ViaPhone
 	public function sendWhatsAppMessage(
 		string $text,
 		string $contactPhoneNumber,
-		string $contactName = null,
+		?string $contactName = null,
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
@@ -96,7 +96,7 @@ class ViaPhone
 		string $type,
 		string $text,
 		string $contactPhoneNumber,
-		string $contactName = null,
+		?string $contactName = null,
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
@@ -134,7 +134,7 @@ class ViaPhone
 		string $sortBy = 'updated_at',
 		string $sortOrder = 'desc',
 		int $limit = 100,
-		int $offset = null
+		?int $offset = null
 	): array
 	{
 		$query = [
@@ -201,7 +201,7 @@ class ViaPhone
 	}
 
 
-	public function call(string $contactPhoneNumber, string $contactName = null, $device = null)
+	public function call(string $contactPhoneNumber, ?string $contactName = null, $device = null)
 	{
 		$data = [
 			'type' => static::TYPE_CALL,
