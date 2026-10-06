@@ -64,6 +64,11 @@ class ViaPhone
 	}
 
 
+	/**
+	 * @param bool $confirmationRequested SMS žádá o potvrzení (připomínka termínu) -
+	 *        ViaPhone pak odpověď pacienta vyhodnotí a pošle ji webhookem s polem
+	 *        `confirmation` (1 přijde, 0 nepřijde, -1 nejde poznat)
+	 */
 	public function sendSmsMessage(
 		string $text,
 		string $contactPhoneNumber,
@@ -71,7 +76,8 @@ class ViaPhone
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
-		?int $validFor = null
+		?int $validFor = null,
+		bool $confirmationRequested = false
 	)
 	{
 		return $this->sendMessage(self::TYPE_SMS, ...func_get_args());
@@ -100,7 +106,8 @@ class ViaPhone
 		$device = null,
 		?string $note = null,
 		?string $uuid = null,
-		?int $validFor = null
+		?int $validFor = null,
+		bool $confirmationRequested = false
 	)
 	{
 		$data = [
@@ -117,6 +124,10 @@ class ViaPhone
 
 		if ($validFor) {
 			$data['valid_for'] = $validFor;
+		}
+
+		if ($confirmationRequested) {
+			$data['confirmation_requested'] = true;
 		}
 
 		return $this->request('records', IRequest::POST, $data);
