@@ -33,7 +33,7 @@ class ViaPhone
 		$this->client = new Client(['base_uri' => $this->url]);
 		$this->headers = [
 			'X-API-Key' => $apiKey,
-			'Accept-Language', $this->lang,
+			'Accept-Language' => $this->lang,
 		];
 	}
 
